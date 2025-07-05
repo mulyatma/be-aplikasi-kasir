@@ -49,16 +49,38 @@ exports.getRangeReport = async (req, res) => {
             createdAt: { $gte: start, $lte: end },
         }).populate('items.menu');
 
-        const totalSales = transactions.reduce((sum, trx) => sum + trx.total, 0);
+        // Group transactions per day
+        const dailyMap = {};
+
+        transactions.forEach((trx) => {
+            const dateKey = trx.createdAt.toISOString().split('T')[0]; // format: YYYY-MM-DD
+
+            if (!dailyMap[dateKey]) {
+                dailyMap[dateKey] = {
+                    totalTransactions: 0,
+                    totalSales: 0,
+                };
+            }
+
+            dailyMap[dateKey].totalTransactions += 1;
+            dailyMap[dateKey].totalSales += trx.total;
+        });
+
+        // Convert map to array sorted by date
+        const dailyReport = Object.keys(dailyMap)
+            .sort()
+            .map((date) => ({
+                date,
+                totalTransactions: dailyMap[date].totalTransactions,
+                totalSales: dailyMap[date].totalSales,
+            }));
 
         res.json({
             range: {
-                startDate: startDate,
-                endDate: endDate,
+                startDate,
+                endDate,
             },
-            totalTransactions: transactions.length,
-            totalSales,
-            transactions,
+            dailyReport,
         });
     } catch (err) {
         console.error(err);
