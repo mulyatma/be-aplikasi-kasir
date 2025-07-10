@@ -14,7 +14,7 @@ exports.addEmployee = async (req, res) => {
         }
 
         const employee = new Employee({
-            userId: req.user.userId,
+            userId: req.user._id,
             name,
             email,
             password,
@@ -31,6 +31,16 @@ exports.addEmployee = async (req, res) => {
                 role: employee.role,
             },
         });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Terjadi kesalahan server.' });
+    }
+};
+
+exports.getEmployees = async (req, res) => {
+    try {
+        const employees = await Employee.find({ userId: req.user._id }).sort({ createdAt: -1 });
+        res.status(200).json(employees);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Terjadi kesalahan server.' });
