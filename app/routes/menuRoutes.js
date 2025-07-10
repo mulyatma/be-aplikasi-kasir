@@ -6,9 +6,9 @@ const checkLastActive = require('../middlewares/lastActive');
 const upload = require('../middlewares/uploadCloudinary');
 
 router.get('/', authMiddleware, checkLastActive, menuController.getMenus);
-router.post('/', authMiddleware, checkLastActive, upload.single('image'), menuController.createMenu);
+router.post('/', authMiddleware, checkLastActive, upload.single('image'), menuController.createMenu); //change middleware only owner can access
 router.get('/:id', authMiddleware, checkLastActive, menuController.getMenuById);
-router.put('/:id', authMiddleware, checkLastActive, menuController.updateMenu);
-router.delete('/:id', authMiddleware, checkLastActive, menuController.deleteMenu);
+router.put('/:id', authMiddleware, checkLastActive, menuController.updateMenu); //change middleware only owner can access
+router.delete('/:id', authMiddleware, checkLastActive, menuController.deleteMenu); //change middleware only owner can access
 
 module.exports = router;

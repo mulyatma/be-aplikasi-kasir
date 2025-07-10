@@ -19,7 +19,7 @@ exports.createTransaction = async (req, res) => {
         for (const item of items) {
             const menu = await Menu.findOne({
                 _id: item.menu,
-                owner: req.user.userId,
+                owner: req.ownerId,
             });
 
             if (!menu) {
@@ -48,7 +48,7 @@ exports.createTransaction = async (req, res) => {
             total,
             amountPaid,
             change,
-            createdBy: req.user.userId,
+            createdBy: req.ownerId,
         });
 
         await transaction.save();

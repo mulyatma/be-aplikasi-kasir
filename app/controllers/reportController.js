@@ -10,7 +10,7 @@ exports.getDailyReport = async (req, res) => {
         tomorrow.setDate(tomorrow.getDate() + 1);
 
         const transactions = await Transaction.find({
-            createdBy: req.user.userId,
+            createdBy: req.ownerId,
             createdAt: { $gte: today, $lt: tomorrow },
         }).populate('items.menu');
 
@@ -45,7 +45,7 @@ exports.getRangeReport = async (req, res) => {
         end.setHours(23, 59, 59, 999);
 
         const transactions = await Transaction.find({
-            createdBy: req.user.userId,
+            createdBy: req.ownerId,
             createdAt: { $gte: start, $lte: end },
         }).populate('items.menu');
 

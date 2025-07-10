@@ -13,7 +13,6 @@ module.exports = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
 
-        // Update lastActiveAt
         await User.findByIdAndUpdate(decoded.userId, { lastActiveAt: new Date() });
 
         next();
