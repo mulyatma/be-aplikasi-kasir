@@ -37,7 +37,6 @@ exports.createMenu = async (req, res) => {
 
 exports.getMenus = async (req, res) => {
     try {
-        console.log(req.user._id);
         const menus = await Menu.find({ owner: req.ownerId }).sort({ createdAt: -1 });
         res.status(200).json(menus);
     } catch (err) {
