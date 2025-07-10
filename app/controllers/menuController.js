@@ -16,7 +16,7 @@ exports.createMenu = async (req, res) => {
             price,
             description,
             image,
-            owner: req.user.userId
+            owner: req.user._id
         });
 
         await menu.save();
@@ -37,7 +37,8 @@ exports.createMenu = async (req, res) => {
 
 exports.getMenus = async (req, res) => {
     try {
-        const menus = await Menu.find({ owner: req.user.userId }).sort({ createdAt: -1 });
+        console.log(req.user._id);
+        const menus = await Menu.find({ owner: req.ownerId }).sort({ createdAt: -1 });
         res.status(200).json(menus);
     } catch (err) {
         console.error(err);
@@ -47,7 +48,7 @@ exports.getMenus = async (req, res) => {
 
 exports.getMenuById = async (req, res) => {
     try {
-        const menu = await Menu.findOne({ _id: req.params.id, owner: req.user.userId });
+        const menu = await Menu.findOne({ _id: req.params.id, owner: req.ownerId });
         if (!menu) {
             return res.status(404).json({ message: 'Menu tidak ditemukan.' });
         }
@@ -65,7 +66,7 @@ exports.updateMenu = async (req, res) => {
         const menu = await Menu.findOneAndUpdate(
             {
                 _id: req.params.id,
-                owner: req.user.userId,
+                owner: req.user._id,
             },
             {
                 name,
@@ -100,7 +101,7 @@ exports.deleteMenu = async (req, res) => {
     try {
         const menu = await Menu.findOneAndDelete({
             _id: req.params.id,
-            owner: req.user.userId, // Validasi kepemilikan
+            owner: req.user._id,
         });
 
         if (!menu) {

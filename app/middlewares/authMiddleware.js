@@ -11,12 +11,32 @@ module.exports = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        const { userId, employeeId } = decoded;
 
-        await User.findByIdAndUpdate(decoded.userId, { lastActiveAt: new Date() });
+        if (employeeId) {
+            return res.status(403).json({ message: 'Akses ditolak, karyawan tidak diperbolehkan.' });
+        }
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Token tidak valid.' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User tidak ditemukan.' });
+        }
+
+        user.lastActiveAt = new Date();
+        await user.save();
+
+        req.user = user;
 
         next();
     } catch (err) {
-        return res.status(401).json({ message: 'Token tidak valid atau kadaluarsa.' });
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Sesi login telah habis. Silakan login kembali.' });
+        }
+        console.error(err);
+        return res.status(401).json({ message: 'Token tidak valid.' });
     }
 };
