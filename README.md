@@ -21,5 +21,4 @@ Proyek ini menyediakan RESTful API untuk mengelola data produk, transaksi penjua
 1. **Clone repository**
    ```bash
    git clone https://github.com/mulyatma/be-aplikasi-kasir.git
-   cd kasir-api
    ```
