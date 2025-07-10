@@ -67,7 +67,7 @@ exports.getTransactions = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
 
-        let filter = { createdBy: req.user.userId };
+        let filter = { createdBy: req.ownerId };
 
         if (startDate || endDate) {
             filter.createdAt = {};
@@ -88,7 +88,7 @@ exports.getTransactionById = async (req, res) => {
     try {
         const transaction = await Transaction.findOne({
             _id: req.params.id,
-            createdBy: req.user.userId,
+            createdBy: req.ownerId
         }).populate('items.menu');
 
         if (!transaction) {
