@@ -66,7 +66,9 @@ exports.login = async (req, res) => {
 
 exports.loginEmployee = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { identifier, password } = req.body;
+
+        const email = identifier;
 
         const employee = await Employee.findOne({ email });
 
