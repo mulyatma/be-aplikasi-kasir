@@ -1,23 +1,24 @@
-const Employee = require('../models/Employee');
+const User = require('../models/User');
 
 exports.addEmployee = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { username, email, password } = req.body;
 
-        if (!name || !email || !password) {
+        if (!username || !email || !password) {
             return res.status(400).json({ message: 'Nama, email, dan password wajib diisi.' });
         }
 
-        const existing = await Employee.findOne({ email });
+        const existing = await User.findOne({ email });
         if (existing) {
             return res.status(400).json({ message: 'Email sudah digunakan karyawan lain.' });
         }
 
-        const employee = new Employee({
-            userId: req.user._id,
-            name,
+        const employee = new User({
+            username,
             email,
             password,
+            role: 'cashier',
+            ownerId: req.user._id,
         });
 
         await employee.save();
@@ -26,7 +27,7 @@ exports.addEmployee = async (req, res) => {
             message: 'Karyawan berhasil ditambahkan.',
             data: {
                 id: employee._id,
-                name: employee.name,
+                username: employee.username,
                 email: employee.email,
                 role: employee.role,
             },
@@ -39,7 +40,7 @@ exports.addEmployee = async (req, res) => {
 
 exports.getEmployees = async (req, res) => {
     try {
-        const employees = await Employee.find({ userId: req.user._id }).sort({ createdAt: -1 });
+        const employees = await User.find({ ownerId: req.user._id }).sort({ createdAt: -1 });
         res.status(200).json(employees);
     } catch (err) {
         console.error(err);

@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const Employee = require('../models/Employee');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
@@ -26,6 +25,7 @@ exports.register = async (req, res) => {
     }
 };
 
+
 exports.login = async (req, res) => {
     try {
         const { identifier, password } = req.body;
@@ -43,8 +43,15 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Password salah.' });
         }
 
+        const payload = {
+            userId: user._id,
+            username: user.username,
+            role: user.role,
+            ownerId: user.ownerId || null,
+        };
+
         const token = jwt.sign(
-            { userId: user._id, username: user.username },
+            payload,
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -56,54 +63,15 @@ exports.login = async (req, res) => {
                 id: user._id,
                 username: user.username,
                 email: user.email,
+                role: user.role,
+                ownerId: user.ownerId || null,
             },
         });
     } catch (err) {
-        console.error(err);
+        console.error('Login error:', err);
         res.status(500).json({ message: 'Terjadi kesalahan server.' });
     }
 };
-
-exports.loginEmployee = async (req, res) => {
-    try {
-        const { identifier, password } = req.body;
-
-        const email = identifier;
-
-        const employee = await Employee.findOne({ email });
-
-        if (!employee) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        const isMatch = await employee.comparePassword(password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Password salah.' });
-        }
-
-        const token = jwt.sign(
-            {
-                employeeId: employee._id,
-                userId: employee.userId,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-
-        res.json({
-            token,
-            employee: {
-                id: employee._id,
-                name: employee.name,
-                email: employee.email,
-                role: employee.role,
-            },
-        });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
 
 exports.logout = async (req, res) => {
     res.json({ message: 'Logout berhasil' });

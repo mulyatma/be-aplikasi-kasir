@@ -16,6 +16,16 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    role: {
+        type: String,
+        enum: ['owner', 'cashier'],
+        default: 'owner',
+    },
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false,
+    },
     lastActiveAt: {
         type: Date,
         default: Date.now

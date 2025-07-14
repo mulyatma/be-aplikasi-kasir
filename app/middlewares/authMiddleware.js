@@ -11,11 +11,7 @@ module.exports = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const { userId, employeeId } = decoded;
-
-        if (employeeId) {
-            return res.status(403).json({ message: 'Akses ditolak, karyawan tidak diperbolehkan.' });
-        }
+        const { userId, role } = decoded;
 
         if (!userId) {
             return res.status(401).json({ message: 'Token tidak valid.' });
@@ -24,6 +20,10 @@ module.exports = async (req, res, next) => {
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'User tidak ditemukan.' });
+        }
+
+        if (role != 'owner') {
+            return res.status(401).json({ message: 'Akses ditolak. Anda bukan owner' });
         }
 
         user.lastActiveAt = new Date();
