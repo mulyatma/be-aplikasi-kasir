@@ -3,7 +3,7 @@ const Menu = require('../models/Menu');
 
 exports.createTransaction = async (req, res) => {
     try {
-        const { items, amountPaid } = req.body;
+        const { items, amountPaid, customer } = req.body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'Items transaksi tidak boleh kosong.' });
@@ -46,6 +46,7 @@ exports.createTransaction = async (req, res) => {
         const transaction = new Transaction({
             items: populatedItems,
             total,
+            customer,
             amountPaid,
             change,
             createdBy: req.ownerId,

@@ -23,6 +23,10 @@ const TransactionSchema = new mongoose.Schema({
             },
         },
     ],
+    customer: {
+        type: String,
+        required: true,
+    },
     total: {
         type: Number,
         required: true,
