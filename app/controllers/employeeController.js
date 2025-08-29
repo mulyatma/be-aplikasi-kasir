@@ -47,3 +47,66 @@ exports.getEmployees = async (req, res) => {
         res.status(500).json({ message: 'Terjadi kesalahan server.' });
     }
 };
+
+exports.getEmployeeById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const employee = await User.findOne({ _id: id, ownerId: req.user._id });
+        if (!employee) {
+            return res.status(404).json({ message: 'Karyawan tidak ditemukan.' });
+        }
+
+        res.status(200).json(employee);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Terjadi kesalahan server.' });
+    }
+};
+
+exports.updateEmployee = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { username, email, password } = req.body;
+
+        const employee = await User.findOne({ _id: id, ownerId: req.user._id });
+        if (!employee) {
+            return res.status(404).json({ message: 'Karyawan tidak ditemukan.' });
+        }
+
+        if (username) employee.username = username;
+        if (email) employee.email = email;
+        if (password) employee.password = password;
+
+        await employee.save();
+
+        res.status(200).json({
+            message: 'Karyawan berhasil diperbarui.',
+            data: {
+                id: employee._id,
+                username: employee.username,
+                email: employee.email,
+                role: employee.role,
+            },
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Terjadi kesalahan server.' });
+    }
+};
+
+exports.deleteEmployee = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const employee = await User.findOneAndDelete({ _id: id, ownerId: req.user._id });
+        if (!employee) {
+            return res.status(404).json({ message: 'Karyawan tidak ditemukan.' });
+        }
+
+        res.status(200).json({ message: 'Karyawan berhasil dihapus.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Terjadi kesalahan server.' });
+    }
+};
