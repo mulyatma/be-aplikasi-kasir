@@ -1,5 +1,6 @@
 const Transaction = require('../models/Transaction');
 const Menu = require('../models/Menu');
+const Stock = require('../models/Stock');
 
 exports.createTransaction = async (req, res) => {
     try {
@@ -15,12 +16,13 @@ exports.createTransaction = async (req, res) => {
 
         let total = 0;
         const populatedItems = [];
+        const stockUpdates = [];
 
         for (const item of items) {
             const menu = await Menu.findOne({
                 _id: item.menu,
                 owner: req.ownerId,
-            });
+            }).populate('ingredients.stock');
 
             if (!menu) {
                 return res.status(404).json({ message: `Menu dengan ID ${item.menu} tidak ditemukan.` });
@@ -35,6 +37,21 @@ exports.createTransaction = async (req, res) => {
                 price: menu.price,
                 subtotal,
             });
+
+            for (const ing of menu.ingredients) {
+                const requiredQty = ing.quantity * item.quantity;
+
+                if (ing.stock.quantity < requiredQty) {
+                    return res.status(400).json({
+                        message: `Stok ${ing.stock.name} tidak cukup. Dibutuhkan ${requiredQty} ${ing.stock.unit}, tersedia ${ing.stock.quantity} ${ing.stock.unit}.`
+                    });
+                }
+
+                stockUpdates.push({
+                    stockId: ing.stock._id,
+                    reduceBy: requiredQty
+                });
+            }
         }
 
         if (amountPaid < total) {
@@ -54,8 +71,14 @@ exports.createTransaction = async (req, res) => {
 
         await transaction.save();
 
+        for (const update of stockUpdates) {
+            await Stock.findByIdAndUpdate(update.stockId, {
+                $inc: { quantity: -update.reduceBy }
+            });
+        }
+
         res.status(201).json({
-            message: 'Transaksi berhasil disimpan.',
+            message: 'Transaksi berhasil disimpan & stok diperbarui.',
             transaction,
         });
     } catch (err) {
