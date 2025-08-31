@@ -2,7 +2,7 @@ const Menu = require('../models/Menu');
 
 exports.createMenu = async (req, res) => {
     try {
-        const { name, price, description } = req.body;
+        const { name, price, description, ingredients } = req.body;
 
         let image;
         if (req.file && req.file.path) {
@@ -11,12 +11,18 @@ exports.createMenu = async (req, res) => {
             image = 'https://res.cloudinary.com/dnlogcrtc/image/upload/v1751429960/cashier_app/26576_efsoo0.jpg';
         }
 
+        let parsedIngredients = [];
+        if (ingredients) {
+            parsedIngredients = typeof ingredients === 'string' ? JSON.parse(ingredients) : ingredients;
+        }
+
         const menu = new Menu({
             name,
             price,
             description,
             image,
-            owner: req.user._id
+            owner: req.user._id,
+            ingredients: parsedIngredients
         });
 
         await menu.save();
