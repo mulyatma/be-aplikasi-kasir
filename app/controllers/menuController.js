@@ -66,7 +66,7 @@ exports.getMenuById = async (req, res) => {
 
 exports.updateMenu = async (req, res) => {
     try {
-        const { name, price, description } = req.body;
+        const { name, price, description, ingredients } = req.body;
 
         const menu = await Menu.findOneAndUpdate(
             {
@@ -77,6 +77,7 @@ exports.updateMenu = async (req, res) => {
                 name,
                 price,
                 description,
+                ...(ingredients && { ingredients }),
             },
             {
                 new: true,
@@ -100,7 +101,6 @@ exports.updateMenu = async (req, res) => {
         });
     }
 };
-
 
 exports.deleteMenu = async (req, res) => {
     try {
