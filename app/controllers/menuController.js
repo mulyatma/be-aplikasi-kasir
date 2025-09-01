@@ -53,16 +53,23 @@ exports.getMenus = async (req, res) => {
 
 exports.getMenuById = async (req, res) => {
     try {
-        const menu = await Menu.findOne({ _id: req.params.id, owner: req.ownerId });
+        const menu = await Menu.findOne({ _id: req.params.id, owner: req.ownerId })
+            .populate({
+                path: "ingredients.stock",
+                select: "name",
+            });
+
         if (!menu) {
-            return res.status(404).json({ message: 'Menu tidak ditemukan.' });
+            return res.status(404).json({ message: "Menu tidak ditemukan." });
         }
+
         res.status(200).json(menu);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Terjadi kesalahan server.' });
+        res.status(500).json({ message: "Terjadi kesalahan server." });
     }
 };
+
 
 exports.updateMenu = async (req, res) => {
     try {
